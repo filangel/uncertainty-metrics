@@ -314,3 +314,57 @@ def plot_rejection_classification_diagram(in_probs,
   ax.set_title('Rejection Classification Diagram', fontsize=20)
   ax.set_xlim([0.0, 1.0])
   return ax
+
+def plot_rejection_metric_diagram(metric_fn,
+                                  targets,
+                                  predictions,
+                                  uncertainties,
+                                  num_thresholds=10,
+                                  ax=None,
+                                  **plot_kwargs):
+  """`metric_fn` vs percent of data rejected diagrams.
+
+  Rejection metric diagrams are plotted to measure a model's OOD
+  performance by evaluating the accuracy of detecting OOD samples only on the
+  percentage of data not rejected by a certain confidence threshold, considering
+  predictions on all OOD points to be incorrect.  For further reference, refer to
+  Section 4 of https://arxiv.org/abs/1912.10481.
+
+  Args:
+    metric_fn: metric function evaluated between targets and predictions.
+    targets: ground truth target points, with shape `[B, ...]`.
+    predictions: model predictions, with shape `[B, ...]`.
+    uncertainties: quantification of uncertainty of model predictions, with shape `[B, ...]`.
+    num_thresholds: (int) number of percentages of rejection in [0.2, 1.0] to
+      evaluate the `metric_fn` on.
+    ax: matplotlib.pyplot Axes object to plot the figure on. If None, the latest
+      figure used is grabbed using `plt.gca()`.
+    **plot_kwargs: Optional plotting arguments to pass into `ax.plot()`.
+
+  Returns:
+    fig: matplotlib.pyplot Axes object.
+  """
+  assert targets.shape[0] == predictions.shape[0] == uncertainties.shape[0]
+
+  num_samples = targets.shape[0]
+  pct_retained = np.linspace(0.2, 1.0, num=num_thresholds)
+
+  # Sorts indexes by ascending uncertainty.
+  mask_uncertainties = np.argsort(uncertainties)
+
+  # Score containers.
+  metric_evaluations = np.empty_like(pct_retained)
+
+  for i, pct in enumerate(pct_retained):
+    # Keep only the %-fraction of lowest uncertainties.
+    mask = np.zeros(num_samples, dtype=bool)
+    mask[mask_uncertainties[:int(num_samples * pct)]] = True
+    metric_evaluations[i] = metric_fn(targets[mask], predictions[mask])
+
+  if ax is None:
+    ax = plt.gca()
+  ax.plot(pct_retained, metric_evaluations, **plot_kwargs)
+  ax.set_xlabel(r'Percent of data retained by uncertainty')
+  ax.set_title('Rejection Metric Diagram', fontsize=20)
+  ax.set_xlim([pct_retained.min(), pct_retained.max()])
+  return ax

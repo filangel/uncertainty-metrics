@@ -40,6 +40,7 @@ from uncertainty_metrics.numpy.semiparametric_calibration_error import spce
 from uncertainty_metrics.numpy.semiparametric_calibration_error import spce_conf_int
 from uncertainty_metrics.numpy.visualization import plot_confidence_vs_accuracy_diagram
 from uncertainty_metrics.numpy.visualization import plot_rejection_classification_diagram
+from uncertainty_metrics.numpy.visualization import plot_rejection_metric_diagram
 from uncertainty_metrics.numpy.visualization import reliability_diagram
 from uncertainty_metrics.version import __version__
 from uncertainty_metrics.version import VERSION
@@ -57,6 +58,7 @@ __all__ = [
     "GeneralCalibrationError",
     "plot_confidence_vs_accuracy_diagram",
     "plot_rejection_classification_diagram",
+    "plot_rejection_metric_diagram",
     "reliability_diagram",
     "rmsce",
     "root_mean_squared_calibration_error",

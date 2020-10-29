@@ -62,5 +62,16 @@ class VisualizationTest(absltest.TestCase):
         in_probs, in_labels, out_probs)
     self.assertGreater(acd.figure.get_figwidth(), 1)
 
+  def test_rejection_metric_diagram(self):
+    num_samples = 10000
+    targets = np.random.randint(low=0, high=2, size=num_samples)
+    predictions = np.random.randint(low=0, high=2, size=num_samples)
+    uncertainties = np.random.uniform(low=0.0, high=1.0, size=num_samples)
+    binary_accuracy_fn = lambda targets, predictions: (targets == predictions).sum() / len(targets)
+
+    acd = um.plot_rejection_metric_diagram(
+        binary_accuracy_fn, targets, predictions, uncertainties)
+    self.assertGreater(acd.figure.get_figwidth(), 1)
+
 if __name__ == '__main__':
   absltest.main()
